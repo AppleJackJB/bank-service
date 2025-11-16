@@ -14,8 +14,8 @@ Bank Service
 - "Transaction" - финансовые транзакции и переводы
 
 Бизнес-сущности:
-- "Loan" - кредитные продукты
-- "Deposit" - срочные вклады
+- "Loan" - кредитные
+- "Deposit" - вклады
 - "ExchangeRate" - курсы валют
 - "CreditCardApplication" - заявки на кредитные карты
 
