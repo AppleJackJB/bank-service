@@ -1,0 +1,171 @@
+Подготовьте коллекцию запросов, демонстрирующую работу ваших новых операций
+	A. Добавьте все запросы: CRUD по каждой сущности и новые бизнес-операции;
+	B. Примеры тел запросов (JSON), переменные окружения при необходимости;
+	C. Проверьте, что можно прогнать сценарий (создать данные → выполнить операцию → увидеть результат).
+
+Банковский Сервис - Коллекция Запросов
+Базовый URL: http://localhost:8080
+
+A.
+	1. КЛИЕНТЫ (CRUD)
+1.1 Создать клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/customers" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"firstName": "John", "lastName": "Smith", "email": "john.smith@mail.com"}'
+
+1.2 Получить всех клиентов
+	Invoke-RestMethod -Uri "http://localhost:8080/customers" -Method GET
+1.3 Получить клиента по ID
+	Invoke-RestMethod -Uri "http://localhost:8080/customers/1" -Method GET
+1.4 Обновить клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/customers/1" -Method PUT -Headers @{"Content-Type"="application/json"} -Body '{"firstName": "Johnny", "lastName": "Smith", "email": "johnny.smith@mail.com"}'
+1.5 Удалить клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/customers/1" -Method DELETE
+	
+2. СЧЕТА (CRUD)
+2.1 Создать счет
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"accountNumber": "ACC1001", "balance": 10000.00, "accountType": "CHECKING", "customer": {"id": 1}}'
+2.2 Получить все счета
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts" -Method GET
+2.3 Получить счет по ID
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/1" -Method GET
+2.4 Обновить счет
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/1" -Method PUT -Headers @{"Content-Type"="application/json"} -Body '{"accountNumber": "ACC1001", "balance": 15000.00, "accountType": "CHECKING", "isActive": true}'
+2.5 Удалить счет
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/1" -Method DELETE
+2.6 Получить счета клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/customer/1" -Method GET
+	
+3. КАРТЫ (CRUD)
+3.1 Создать карту
+	Invoke-RestMethod -Uri "http://localhost:8080/cards" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"cardNumber": "4111111111111111", "cardHolderName": "JOHN SMITH", "expiryDate": "2027-12-31", "cvv": "123", "cardType": "DEBIT", "account": {"id": 1}}'
+3.2 Получить все карты
+	Invoke-RestMethod -Uri "http://localhost:8080/cards" -Method GET
+3.3 Получить карту по ID
+	Invoke-RestMethod -Uri "http://localhost:8080/cards/1" -Method GET
+3.4 Обновить карту
+	Invoke-RestMethod -Uri "http://localhost:8080/cards/1" -Method PUT -Headers @{"Content-Type"="application/json"} -Body '{"cardNumber": "4111111111111111", "cardHolderName": "JOHN SMITH", "expiryDate": "2028-12-31", "cvv": "123", "cardType": "DEBIT", "isActive": true}'
+3.5 Удалить карту
+	Invoke-RestMethod -Uri "http://localhost:8080/cards/1" -Method DELETE
+3.6 Получить карты по счету
+	Invoke-RestMethod -Uri "http://localhost:8080/cards/account/1" -Method GET
+
+	4. ТРАНЗАКЦИИ (CRUD)
+4.1 Создать транзакцию
+	Invoke-RestMethod -Uri "http://localhost:8080/transactions" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"amount": 1000.00, "transactionType": "TRANSFER", "description": "Test transfer", "fromAccount": {"id": 1}, "toAccount": {"id": 2}}'
+4.2 Получить все транзакции
+	Invoke-RestMethod -Uri "http://localhost:8080/transactions" -Method GET
+4.3 Получить транзакцию по ID
+	Invoke-RestMethod -Uri "http://localhost:8080/transactions/1" -Method GET
+4.4 Удалить транзакцию
+	Invoke-RestMethod -Uri "http://localhost:8080/transactions/1" -Method DELETE
+4.5 Получить транзакции по счету
+	Invoke-RestMethod -Uri "http://localhost:8080/transactions/account/ACC1001" -Method GET
+
+5. БИЗНЕС-ОПЕРАЦИИ
+5.1 Взять кредит
+	Invoke-RestMethod -Uri "http://localhost:8080/loans/take?accountId=1&amount=5000&termMonths=12&interestRate=10.5" -Method POST
+5.2 Погасить кредит
+	Invoke-RestMethod -Uri "http://localhost:8080/loans/1/repay?accountId=1&amount=500" -Method POST
+5.3 Получить кредиты клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/loans/customer/1" -Method GET
+5.4 Открыть вклад
+	Invoke-RestMethod -Uri "http://localhost:8080/deposits/open?accountId=2&amount=2000&interestRate=7.5&termMonths=6" -Method POST
+5.5 Закрыть вклад
+	Invoke-RestMethod -Uri "http://localhost:8080/deposits/1/close" -Method POST
+5.6 Получить вклады клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/deposits/customer/1" -Method GET
+5.7 Установить курс валют
+	Invoke-RestMethod -Uri "http://localhost:8080/exchange/rate?fromCurrency=USD&toCurrency=RUB&rate=90.5" -Method POST
+5.8 Конвертировать валюту
+	Invoke-RestMethod -Uri "http://localhost:8080/exchange/convert?fromAccountId=1&toAccountId=2&amount=100&fromCurrency=USD&toCurrency=RUB" -Method POST
+5.9 Получить курс валют
+	Invoke-RestMethod -Uri "http://localhost:8080/exchange/rate/USD/RUB" -Method GET
+5.10 Подать заявку на кредитную карту
+	Invoke-RestMethod -Uri "http://localhost:8080/credit-cards/apply?customerId=1&requestedLimit=50000&employmentType=FULL_TIME&monthlyIncome=100000" -Method POST
+5.11 Одобрить кредитную карту
+	Invoke-RestMethod -Uri "http://localhost:8080/credit-cards/applications/1/approve?accountId=1&approvedLimit=40000" -Method POST
+5.12 Начислить проценты
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/2/accrue-interest" -Method POST
+5.13 Закрыть счет
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/1/close-account" -Method POST
+
+B.
+	Примеры тел запросов.
+
+1. Создание клиента:
+{
+  "firstName": "John",
+  "lastName": "Smith", 
+  "email": "john.smith@mail.com"
+}
+
+2. Создание счета:
+{
+  "accountNumber": "ACC1001",
+  "balance": 10000.00,
+  "accountType": "CHECKING",
+  "customer": {
+    "id": 1
+  }
+}
+
+3. Создание карты:
+{
+  "cardNumber": "4111111111111111",
+  "cardHolderName": "JOHN SMITH",
+  "expiryDate": "2027-12-31",
+  "cvv": "123", 
+  "cardType": "DEBIT",
+  "account": {
+    "id": 1
+  }
+}
+
+4. Создание транзакции:
+{
+  "amount": 1000.00,
+  "transactionType": "TRANSFER",
+  "description": "Test transfer",
+  "fromAccount": {
+    "id": 1
+  },
+  "toAccount": {
+    "id": 2
+  }
+}
+
+5. Обновление клиента:
+{
+  "firstName": "Johnny",
+  "lastName": "Smith",
+  "email": "johnny.smith@mail.com"
+}
+
+	Переменные окружения.
+
+server.port=8080
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/bankdb
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:123}
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+C.
+	ТЕСТОВЫЕ СЦЕНАРИИ
+Сценарий 1: "Полный путь клиента"
+
+Шаг 1: Создать клиента
+	Invoke-RestMethod -Uri "http://localhost:8080/customers" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"firstName": "Alice", "lastName": "Brown", "email": "alice.brown@mail.com"}'
+Шаг 2: Создать счет
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"accountNumber": "ACC4001", "balance": 5000, "accountType": "CHECKING", "customer": {"id": 3}}'
+
+Шаг 3: Создать карту
+	Invoke-RestMethod -Uri "http://localhost:8080/cards" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"cardNumber": "4333333333333333", "cardHolderName": "ALICE BROWN", "expiryDate": "2027-12-31", "cvv": "789", "cardType": "DEBIT", "account": {"id": 5}}'
+
+Шаг 4: Взять кредит
+	Invoke-RestMethod -Uri "http://localhost:8080/loans/take?accountId=5&amount=3000&termMonths=6&interestRate=8.5" -Method POST
+
+Шаг 5: Проверить результаты
+	Invoke-RestMethod -Uri "http://localhost:8080/accounts/5" -Method GET
+	Invoke-RestMethod -Uri "http://localhost:8080/loans/customer/3" -Method GET
