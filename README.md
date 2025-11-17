@@ -1,5 +1,6 @@
-Demo 2 л.р.
-bank-service-main 3 л.р.
+Demo - 2 л.р.
+bank-service-main - 3 л.р.
+bank-service-main 4 - 4 л.р.
 
 Bank Service
 Тема проекта
