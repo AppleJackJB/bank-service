@@ -1,88 +1,70 @@
 package com.example.demo.controller;
+
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.entity.Transaction;
-import com.example.demo.entity.Account;
-import com.example.demo.repository.TransactionRepository;
-import com.example.demo.repository.AccountRepository;
+import com.example.demo.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/transactions")
 @Transactional(readOnly = true)
 public class TransactionController {
-    
-    @Autowired
-    private TransactionRepository transactionRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private TransactionService transactionService;
 
     @PostMapping
     @Transactional
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        // Проверяем существование счетов
-        if (transaction.getFromAccount() != null && transaction.getFromAccount().getId() != null) {
-            Optional<Account> fromAccount = accountRepository.findById(transaction.getFromAccount().getId());
-            if (fromAccount.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            transaction.setFromAccount(fromAccount.get());
+        try {
+            Transaction savedTransaction = transactionService.createTransaction(transaction);
+            return ResponseEntity.ok(savedTransaction);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
-        
-        if (transaction.getToAccount() != null && transaction.getToAccount().getId() != null) {
-            Optional<Account> toAccount = accountRepository.findById(transaction.getToAccount().getId());
-            if (toAccount.isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            transaction.setToAccount(toAccount.get());
-        }
-        
-        Transaction savedTransaction = transactionRepository.save(transaction);
-        return ResponseEntity.ok(savedTransaction);
     }
 
     @GetMapping
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+        return transactionService.getAllTransactions();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id) {
-        Optional<Transaction> transaction = transactionRepository.findById(id);
+        Optional<Transaction> transaction = transactionService.getTransactionById(id);
         return transaction.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction transactionDetails) {
-        Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
-        if (optionalTransaction.isPresent()) {
-            Transaction transaction = optionalTransaction.get();
-            transaction.setAmount(transactionDetails.getAmount());
-            transaction.setTransactionType(transactionDetails.getTransactionType());
-            transaction.setDescription(transactionDetails.getDescription());
-            Transaction updatedTransaction = transactionRepository.save(transaction);
+        try {
+            Transaction updatedTransaction = transactionService.updateTransaction(id, transactionDetails);
             return ResponseEntity.ok(updatedTransaction);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    @Transactional 
+    @Transactional
     public ResponseEntity<String> deleteTransaction(@PathVariable Long id) {
-        if (transactionRepository.existsById(id)) {
-            transactionRepository.deleteById(id);
+        try {
+            transactionService.deleteTransaction(id);
             return ResponseEntity.ok("Transaction deleted");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/account/{accountNumber}")
     public List<Transaction> getTransactionsByAccount(@PathVariable String accountNumber) {
-        return transactionRepository.findByFromAccountAccountNumberOrToAccountAccountNumber(accountNumber, accountNumber);
+        return transactionService.getTransactionsByAccount(accountNumber);
     }
 }
